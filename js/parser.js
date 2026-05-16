@@ -84,6 +84,10 @@ function parseArtifacts(rawInput) {
   for (const m of text.matchAll(/\\\\\.\\pipe\\[\w.\-]+/gi))
     add('pipe', 'Named Pipe', 'host', m[0]);
 
+  /* 5b. Mutex names */
+  for (const m of text.matchAll(/\b(?:Global|Local|Session)\\[^\s"'<>|,;\n\\]{2,64}/gi))
+    add('mutex', 'Mutex', 'host', m[0]);
+
   /* 6. URLs */
   for (const m of text.matchAll(/https?:\/\/[^\s"'<>\[\]{}|\\^`\n]+/gi)) {
     const v = m[0].replace(/[.,;:!?)\]>]+$/, '');
@@ -107,6 +111,10 @@ function parseArtifacts(rawInput) {
   /* 10. MAC addresses */
   for (const m of text.matchAll(/\b([0-9a-fA-F]{2}[:\-]){5}[0-9a-fA-F]{2}\b/g))
     add('mac', 'MAC', 'network', m[0].toLowerCase());
+
+  /* 10a. ASN numbers */
+  for (const m of text.matchAll(/\bASN?\s*(\d{1,10})\b/gi))
+    add('asn', 'ASN', 'network', `AS${m[1]}`);
 
   /* 11. Ports — explicit "port NNN" and ":PORT" not in timestamps */
   for (const m of text.matchAll(/\bports?\s+(\d{1,5})\b/gi)) {
@@ -137,6 +145,13 @@ function parseArtifacts(rawInput) {
   for (const m of text.matchAll(/\/(?:etc|tmp|var|usr|home|bin|sbin|opt|proc|sys|dev|root|boot|lib)(?:\/[\w.\-]+)+/g))
     add('unixpath', 'Unix Path', 'host', m[0]);
 
+  /* 14a. Base64 blobs — require at least one non-hex base64 char to avoid hash overlap */
+  for (const m of text.matchAll(/[A-Za-z0-9+/]{40,}={0,2}/g)) {
+    const v = m[0];
+    if (!/[G-Zg-z+/]/.test(v)) continue;
+    add('base64', 'Base64', 'threat', v);
+  }
+
   /* 15. Domains — after IPs/URLs so numeric-only dotted strings stay as IPs */
   const domainRe = /\b(?:[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}\b/gi;
   for (const m of text.matchAll(domainRe)) {
@@ -162,19 +177,20 @@ function getTypeCounts(artifacts) {
 
 const TYPE_LABELS = {
   ip: 'IPv4', ipv6: 'IPv6', domain: 'Domain', url: 'URL',
-  email: 'Email', mac: 'MAC', port: 'Port',
+  email: 'Email', mac: 'MAC', port: 'Port', asn: 'ASN',
   hash_md5: 'MD5', hash_sha1: 'SHA-1', hash_sha256: 'SHA-256', hash_sha512: 'SHA-512',
   registry: 'Registry', winpath: 'Win Path', unixpath: 'Unix Path',
   process: 'Process', dll: 'DLL/Driver', cve: 'CVE', mitre: 'ATT&CK',
-  pipe: 'Named Pipe', clsid: 'CLSID',
+  pipe: 'Named Pipe', clsid: 'CLSID', mutex: 'Mutex',
   wallet_btc: 'BTC Wallet', wallet_eth: 'ETH Wallet', wallet_xmr: 'XMR Wallet',
+  base64: 'Base64',
 };
 
 const GROUP_TYPES = {
-  network: ['ip', 'ipv6', 'domain', 'url', 'email', 'mac', 'port'],
+  network: ['ip', 'ipv6', 'domain', 'url', 'email', 'mac', 'port', 'asn'],
   hash:    ['hash_md5', 'hash_sha1', 'hash_sha256', 'hash_sha512'],
-  host:    ['registry', 'winpath', 'unixpath', 'process', 'dll', 'pipe', 'clsid'],
-  threat:  ['cve', 'mitre', 'wallet_btc', 'wallet_eth', 'wallet_xmr'],
+  host:    ['registry', 'winpath', 'unixpath', 'process', 'dll', 'pipe', 'clsid', 'mutex'],
+  threat:  ['cve', 'mitre', 'wallet_btc', 'wallet_eth', 'wallet_xmr', 'base64'],
 };
 
 function parseRealtime() {

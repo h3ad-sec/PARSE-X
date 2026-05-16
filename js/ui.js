@@ -27,6 +27,9 @@ const TYPE_COLORS = {
   mitre:       '#e879f9',
   pipe:        '#f97316',
   clsid:       '#fb7185',
+  mutex:       '#fbbf24',
+  asn:         '#38bdf8',
+  base64:      '#a78bfa',
   wallet_btc:  '#f59e0b',
   wallet_eth:  '#8b5cf6',
   wallet_xmr:  '#ec4899',
@@ -148,7 +151,7 @@ function copyVal(val) {
 }
 
 /* ── Summary strip ────────────────────────────────────────────────────────── */
-const TYPE_ORDER = ['ip','ipv6','domain','url','email','mac','port','hash_md5','hash_sha1','hash_sha256','hash_sha512','registry','winpath','unixpath','process','dll','clsid','pipe','cve','mitre','wallet_btc','wallet_eth','wallet_xmr'];
+const TYPE_ORDER = ['ip','ipv6','domain','url','email','mac','port','asn','hash_md5','hash_sha1','hash_sha256','hash_sha512','registry','winpath','unixpath','process','dll','clsid','pipe','mutex','cve','mitre','wallet_btc','wallet_eth','wallet_xmr','base64'];
 
 function buildSummaryStrip() {
   const counts = getTypeCounts(allArtifacts);
