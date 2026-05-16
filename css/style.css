@@ -23,12 +23,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:va
 #matrix{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.2;}
 
 /* ── Animations ──────────────────────────────────────────────────────────── */
-@keyframes fadeIn      { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
-@keyframes rowIn       { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:none} }
-@keyframes chipPop     { from{opacity:0;transform:scale(.88)} to{opacity:1;transform:scale(1)} }
-@keyframes stripeSlide { from{transform:scaleY(0)} to{transform:scaleY(1)} }
-@keyframes pulseGlow   { 0%,100%{box-shadow:0 0 18px rgba(0,255,159,.2)} 50%{box-shadow:0 0 32px rgba(0,255,159,.5)} }
-@keyframes capFade     { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+@keyframes fadeIn    { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+@keyframes rowIn     { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:none} }
+@keyframes chipPop   { from{opacity:0;transform:scale(.88)} to{opacity:1;transform:scale(1)} }
+@keyframes pulseGlow { 0%,100%{box-shadow:0 0 18px rgba(0,255,159,.2)} 50%{box-shadow:0 0 32px rgba(0,255,159,.5)} }
+@keyframes capFade   { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
 
 /* ── Nav ─────────────────────────────────────────────────────────────────── */
 .nav{position:fixed;top:0;left:0;right:0;z-index:50;background:var(--panel);border-bottom:1px solid var(--border);height:var(--nav-h);display:flex;align-items:center;padding:0 1.25rem;transition:background .3s,border-color .3s;}
@@ -174,8 +173,6 @@ body.light .btn-extract{color:#fff;}
 
 /* Color stripe column */
 .col-stripe{width:4px;padding:0!important;}
-.col-stripe-cell{display:block;height:100%;width:4px;min-height:38px;border-radius:0;transform-origin:top;animation:stripeSlide .25s ease both;}
-.results-table th.col-stripe{padding:0!important;}
 
 .col-num{width:40px;font-family:var(--mono);font-size:var(--fs-xs);color:var(--muted);text-align:right;padding-right:10px;}
 .col-type{width:130px;}
@@ -215,6 +212,7 @@ body.light .btn-extract{color:#fff;}
 .footer-brand{color:var(--accent);text-decoration:none;}
 .footer-project{color:var(--accent2);}
 .footer-sep{color:var(--border);}
+.footer-muted{color:var(--muted);}
 
 /* ── Scrollbar ───────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar{width:5px;height:5px;}

@@ -14,7 +14,7 @@ const TYPE_COLORS = {
   email:       '#f59e0b',
   mac:         '#a855f7',
   port:        '#3b82f6',
-  hash_md5:    '#f59e0b',
+  hash_md5:    '#64748b',
   hash_sha1:   '#fb923c',
   hash_sha256: '#ff6b35',
   hash_sha512: '#ef4444',
@@ -30,7 +30,7 @@ const TYPE_COLORS = {
   mutex:       '#fbbf24',
   asn:         '#38bdf8',
   base64:      '#a78bfa',
-  wallet_btc:  '#f59e0b',
+  wallet_btc:  '#d97706',
   wallet_eth:  '#8b5cf6',
   wallet_xmr:  '#ec4899',
 };
@@ -121,22 +121,20 @@ function buildRow(a, idx) {
   const color = TYPE_COLORS[a.type] || 'var(--muted)';
   const displayVal = a.value.length > 90 ? a.value.slice(0, 90) + '…' : a.value;
   const escapedVal = escapeHtml(a.value);
-  const safeVal = escapedVal.replace(/'/g, '&#39;');
+  const jsVal = JSON.stringify(a.value).replace(/"/g, '&quot;');
   const delay = Math.min(idx * 18, 300);
 
   return `<tr style="animation-delay:${delay}ms">
-    <td class="col-stripe" style="padding:0">
-      <span class="col-stripe-cell" style="background:${color};animation-delay:${delay}ms"></span>
-    </td>
+    <td class="col-stripe" style="background:${color}"></td>
     <td class="col-num">${idx}</td>
     <td class="col-type">
       <span class="type-badge" style="color:${color};border-color:${color}20;background:${color}10">${escapeHtml(a.label)}</span>
     </td>
     <td class="col-val">
-      <span class="artifact-val" title="${escapedVal}" onclick="copyVal('${safeVal}')">${escapeHtml(displayVal)}</span>
+      <span class="artifact-val" title="${escapedVal}" onclick="copyVal(${jsVal})">${escapeHtml(displayVal)}</span>
     </td>
     <td class="col-copy">
-      <button class="btn-copy" onclick="copyVal('${safeVal}')" title="Copy to clipboard">
+      <button class="btn-copy" onclick="copyVal(${jsVal})" title="Copy to clipboard">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
           <rect x="1" y="3" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/>
           <path d="M3 1h8v8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
@@ -286,21 +284,21 @@ function genUUID() {
 function exportSTIX(artifacts) {
   const now = new Date().toISOString();
   const objects = artifacts.map(a => {
-    const v = a.value;
+    const pv = a.value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     let pattern;
     switch (a.type) {
-      case 'ip':         pattern = `[ipv4-addr:value = '${v}']`; break;
-      case 'ipv6':       pattern = `[ipv6-addr:value = '${v}']`; break;
-      case 'domain':     pattern = `[domain-name:value = '${v}']`; break;
-      case 'url':        pattern = `[url:value = '${v}']`; break;
-      case 'email':      pattern = `[email-addr:value = '${v}']`; break;
-      case 'mac':        pattern = `[mac-addr:value = '${v}']`; break;
-      case 'hash_md5':   pattern = `[file:hashes.'MD5' = '${v}']`; break;
-      case 'hash_sha1':  pattern = `[file:hashes.'SHA-1' = '${v}']`; break;
-      case 'hash_sha256':pattern = `[file:hashes.'SHA-256' = '${v}']`; break;
-      case 'hash_sha512':pattern = `[file:hashes.'SHA-512' = '${v}']`; break;
-      case 'cve':        pattern = `[vulnerability:name = '${v}']`; break;
-      default:           pattern = `[x-parsex-artifact:type = '${a.type}' AND x-parsex-artifact:value = '${v}']`;
+      case 'ip':         pattern = `[ipv4-addr:value = '${pv}']`; break;
+      case 'ipv6':       pattern = `[ipv6-addr:value = '${pv}']`; break;
+      case 'domain':     pattern = `[domain-name:value = '${pv}']`; break;
+      case 'url':        pattern = `[url:value = '${pv}']`; break;
+      case 'email':      pattern = `[email-addr:value = '${pv}']`; break;
+      case 'mac':        pattern = `[mac-addr:value = '${pv}']`; break;
+      case 'hash_md5':   pattern = `[file:hashes.'MD5' = '${pv}']`; break;
+      case 'hash_sha1':  pattern = `[file:hashes.'SHA-1' = '${pv}']`; break;
+      case 'hash_sha256':pattern = `[file:hashes.'SHA-256' = '${pv}']`; break;
+      case 'hash_sha512':pattern = `[file:hashes.'SHA-512' = '${pv}']`; break;
+      case 'cve':        pattern = `[vulnerability:name = '${pv}']`; break;
+      default:           pattern = `[x-parsex-artifact:type = '${a.type}' AND x-parsex-artifact:value = '${pv}']`;
     }
     const name = `${a.label}: ${v.length > 80 ? v.slice(0, 80) : v}`;
     return {
