@@ -15,7 +15,7 @@ function extractArtifacts() {
   const raw = document.getElementById('px-input')?.value || '';
   if (!raw.trim()) return;
 
-  const artifacts = parseArtifacts(raw);
+  const { artifacts, dupesRemoved } = parseArtifacts(raw);
   if (!artifacts.length) {
     showToast('No artifacts detected in input', 'warning');
     return;
@@ -25,7 +25,8 @@ function extractArtifacts() {
 
   const counts = getTypeCounts(artifacts);
   const typeCount = Object.keys(counts).length;
-  showToast(`${artifacts.length} artifacts extracted · ${typeCount} type${typeCount > 1 ? 's' : ''}`, 'success');
+  const dupeNote = dupesRemoved > 0 ? ` · ${dupesRemoved} dupes removed` : '';
+  showToast(`${artifacts.length} artifacts extracted · ${typeCount} type${typeCount > 1 ? 's' : ''}${dupeNote}`, 'success');
 
   setTimeout(() => {
     document.getElementById('results-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });

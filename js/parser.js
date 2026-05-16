@@ -21,10 +21,11 @@ function parseArtifacts(rawInput) {
   const seen = new Set();
   const artifacts = [];
   let uid = 0;
+  let dupesRemoved = 0;
 
   function add(type, label, group, value) {
     const key = `${type}::${value}`;
-    if (seen.has(key)) return;
+    if (seen.has(key)) { dupesRemoved++; return; }
     seen.add(key);
     artifacts.push({ id: ++uid, type, label, group, value });
   }
@@ -48,15 +49,40 @@ function parseArtifacts(rawInput) {
   for (const m of text.matchAll(/\bT\d{4}(?:\.\d{3})?\b/g))
     add('mitre', 'ATT&CK', 'threat', m[0]);
 
+  /* 3a. ETH wallets */
+  for (const m of text.matchAll(/\b0x[0-9a-fA-F]{40}\b/g)) {
+    const hexPart = m[0].slice(2).toLowerCase();
+    if (seen.has(`hash_sha1::${hexPart}`)) continue;
+    add('wallet_eth', 'ETH Wallet', 'threat', m[0]);
+  }
+
+  /* 3b. BTC wallets */
+  for (const m of text.matchAll(/\bbc1[ac-hj-np-z02-9]{6,87}\b/g))
+    add('wallet_btc', 'BTC Wallet', 'threat', m[0]);
+  for (const m of text.matchAll(/\b[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b/g))
+    add('wallet_btc', 'BTC Wallet', 'threat', m[0]);
+
+  /* 3c. XMR wallets */
+  for (const m of text.matchAll(/\b4[0-9AB][1-9A-HJ-NP-Za-km-z]{93}\b/g))
+    add('wallet_xmr', 'XMR Wallet', 'threat', m[0]);
+
   /* 4. Registry keys */
   for (const m of text.matchAll(/\b(HKEY_LOCAL_MACHINE|HKEY_CURRENT_USER|HKEY_CLASSES_ROOT|HKEY_USERS|HKEY_CURRENT_CONFIG|HKLM|HKCU|HKU|HKCR|HKCC)\\[^\s"'<>|,;\n]+/gi))
     add('registry', 'Registry', 'host', m[0]);
+
+  /* 4a. CLSIDs */
+  for (const m of text.matchAll(/\{[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\}/g))
+    add('clsid', 'CLSID', 'host', m[0].toUpperCase());
 
   /* 5. Windows paths — drive letter or env var prefix */
   for (const m of text.matchAll(/(?:[a-zA-Z]:\\|%[a-zA-Z_][a-zA-Z0-9_]*%\\)[^\s"'<>|,;\n]+/g)) {
     const v = m[0].replace(/[\\.,;!?)\]>]+$/, '');
     add('winpath', 'Win Path', 'host', v);
   }
+
+  /* 5a. Named pipes */
+  for (const m of text.matchAll(/\\\\\.\\pipe\\[\w.\-]+/gi))
+    add('pipe', 'Named Pipe', 'host', m[0]);
 
   /* 6. URLs */
   for (const m of text.matchAll(/https?:\/\/[^\s"'<>\[\]{}|\\^`\n]+/gi)) {
@@ -125,7 +151,7 @@ function parseArtifacts(rawInput) {
     add('domain', 'Domain', 'network', v);
   }
 
-  return artifacts;
+  return { artifacts, dupesRemoved };
 }
 
 function getTypeCounts(artifacts) {
@@ -140,18 +166,20 @@ const TYPE_LABELS = {
   hash_md5: 'MD5', hash_sha1: 'SHA-1', hash_sha256: 'SHA-256', hash_sha512: 'SHA-512',
   registry: 'Registry', winpath: 'Win Path', unixpath: 'Unix Path',
   process: 'Process', dll: 'DLL/Driver', cve: 'CVE', mitre: 'ATT&CK',
+  pipe: 'Named Pipe', clsid: 'CLSID',
+  wallet_btc: 'BTC Wallet', wallet_eth: 'ETH Wallet', wallet_xmr: 'XMR Wallet',
 };
 
 const GROUP_TYPES = {
   network: ['ip', 'ipv6', 'domain', 'url', 'email', 'mac', 'port'],
   hash:    ['hash_md5', 'hash_sha1', 'hash_sha256', 'hash_sha512'],
-  host:    ['registry', 'winpath', 'unixpath', 'process', 'dll'],
-  threat:  ['cve', 'mitre'],
+  host:    ['registry', 'winpath', 'unixpath', 'process', 'dll', 'pipe', 'clsid'],
+  threat:  ['cve', 'mitre', 'wallet_btc', 'wallet_eth', 'wallet_xmr'],
 };
 
 function parseRealtime() {
   const raw = document.getElementById('px-input')?.value || '';
-  const artifacts = parseArtifacts(raw);
+  const { artifacts, dupesRemoved } = parseArtifacts(raw);
   const total = artifacts.length;
   const infoEl = document.getElementById('parsed-info');
   const btnEl  = document.getElementById('extract-btn');
@@ -166,8 +194,8 @@ function parseRealtime() {
   const chips = Object.entries(counts).map(([t, c]) => {
     const color = (typeof TYPE_COLORS !== 'undefined' && TYPE_COLORS[t]) || 'var(--muted)';
     const lbl = TYPE_LABELS[t] || t;
-    return `<span style="color:${color};white-space:nowrap">${c} ${lbl}</span>`;
+    return `<span style="color:${color};white-space:nowrap">${c} ${lbl}</span>`;
   });
-  if (infoEl) infoEl.innerHTML = `<span>${total}</span> found · ` + chips.join('<span style="color:var(--border)"> · </span>');
+  if (infoEl) infoEl.innerHTML = `<span>${total}</span> found · ` + chips.join('<span style="color:var(--border)"> · </span>') + (dupesRemoved > 0 ? `<span style="color:var(--muted)">${dupesRemoved} dupes removed</span>` : '');
   if (btnEl) btnEl.disabled = false;
 }

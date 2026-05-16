@@ -25,6 +25,11 @@ const TYPE_COLORS = {
   dll:         '#4ade80',
   cve:         '#ff3b5c',
   mitre:       '#e879f9',
+  pipe:        '#f97316',
+  clsid:       '#fb7185',
+  wallet_btc:  '#f59e0b',
+  wallet_eth:  '#8b5cf6',
+  wallet_xmr:  '#ec4899',
 };
 
 /* ── Helpers ──────────────────────────────────────────────────────────────── */
@@ -143,7 +148,7 @@ function copyVal(val) {
 }
 
 /* ── Summary strip ────────────────────────────────────────────────────────── */
-const TYPE_ORDER = ['ip','ipv6','domain','url','email','mac','port','hash_md5','hash_sha1','hash_sha256','hash_sha512','registry','winpath','unixpath','process','dll','cve','mitre'];
+const TYPE_ORDER = ['ip','ipv6','domain','url','email','mac','port','hash_md5','hash_sha1','hash_sha256','hash_sha512','registry','winpath','unixpath','process','dll','clsid','pipe','cve','mitre','wallet_btc','wallet_eth','wallet_xmr'];
 
 function buildSummaryStrip() {
   const counts = getTypeCounts(allArtifacts);
@@ -202,6 +207,7 @@ function doExport() {
   if (fmt === 'csv')  exportCSV(data);
   if (fmt === 'json') exportJSON(data);
   if (fmt === 'md')   exportMD(data);
+  if (fmt === 'stix') exportSTIX(data);
 
   document.getElementById('export-modal').classList.remove('open');
 }
@@ -240,5 +246,80 @@ function copyAllArtifacts() {
   navigator.clipboard.writeText(text).then(() =>
     showToast(`Copied ${allArtifacts.length} artifacts`, 'success')
   );
+}
+
+function copyByGroup(grp) {
+  const g = grp || activeGroup;
+  let list = allArtifacts;
+  if (g && g !== 'all') {
+    const types = GROUP_TYPES[g] || [];
+    list = list.filter(a => types.includes(a.type));
+  }
+  if (!list.length) { showToast('No artifacts to copy', 'warning'); return; }
+  const text = list.map(a => `${a.label}\t${a.value}`).join('\n');
+  navigator.clipboard.writeText(text).then(() =>
+    showToast(`Copied ${list.length} ${g && g !== 'all' ? g : 'all'} artifacts`, 'success')
+  );
+}
+
+function pivotToXVerdikt() {
+  const XVERDIKT_TYPES = ['ip','ipv6','domain','url','hash_md5','hash_sha1','hash_sha256','hash_sha512'];
+  const list = allArtifacts.filter(a => XVERDIKT_TYPES.includes(a.type));
+  if (!list.length) { showToast('No network/hash IOCs found', 'warning'); return; }
+  const text = list.map(a => a.value).join('\n');
+  navigator.clipboard.writeText(text).then(() => {
+    showToast(`${list.length} IOCs copied — paste into X-VERDIKT`, 'success');
+    window.open('https://h3ad-sec.github.io/X-VERDIKT/', '_blank');
+  });
+}
+
+function genUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
+function exportSTIX(artifacts) {
+  const now = new Date().toISOString();
+  const objects = artifacts.map(a => {
+    const v = a.value;
+    let pattern;
+    switch (a.type) {
+      case 'ip':         pattern = `[ipv4-addr:value = '${v}']`; break;
+      case 'ipv6':       pattern = `[ipv6-addr:value = '${v}']`; break;
+      case 'domain':     pattern = `[domain-name:value = '${v}']`; break;
+      case 'url':        pattern = `[url:value = '${v}']`; break;
+      case 'email':      pattern = `[email-addr:value = '${v}']`; break;
+      case 'mac':        pattern = `[mac-addr:value = '${v}']`; break;
+      case 'hash_md5':   pattern = `[file:hashes.'MD5' = '${v}']`; break;
+      case 'hash_sha1':  pattern = `[file:hashes.'SHA-1' = '${v}']`; break;
+      case 'hash_sha256':pattern = `[file:hashes.'SHA-256' = '${v}']`; break;
+      case 'hash_sha512':pattern = `[file:hashes.'SHA-512' = '${v}']`; break;
+      case 'cve':        pattern = `[vulnerability:name = '${v}']`; break;
+      default:           pattern = `[x-parsex-artifact:type = '${a.type}' AND x-parsex-artifact:value = '${v}']`;
+    }
+    const name = `${a.label}: ${v.length > 80 ? v.slice(0, 80) : v}`;
+    return {
+      type: 'indicator',
+      spec_version: '2.1',
+      id: `indicator--${genUUID()}`,
+      created: now,
+      modified: now,
+      name,
+      pattern,
+      pattern_type: 'stix',
+      valid_from: now,
+      labels: [a.group || 'unknown'],
+    };
+  });
+  const bundle = {
+    type: 'bundle',
+    id: `bundle--${genUUID()}`,
+    spec_version: '2.1',
+    objects,
+  };
+  downloadFile('parse-x-artifacts.stix.json', JSON.stringify(bundle, null, 2), 'application/json');
+  showToast(`STIX 2.1 exported — ${artifacts.length} indicators`, 'success');
 }
 
