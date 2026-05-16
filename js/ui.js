@@ -263,16 +263,6 @@ function copyByGroup(grp) {
   );
 }
 
-function pivotToXVerdikt() {
-  const XVERDIKT_TYPES = ['ip','ipv6','domain','url','hash_md5','hash_sha1','hash_sha256','hash_sha512'];
-  const list = allArtifacts.filter(a => XVERDIKT_TYPES.includes(a.type));
-  if (!list.length) { showToast('No network/hash IOCs found', 'warning'); return; }
-  const text = list.map(a => a.value).join('\n');
-  navigator.clipboard.writeText(text).then(() => {
-    showToast(`${list.length} IOCs copied — paste into X-VERDIKT`, 'success');
-    window.open('https://h3ad-sec.github.io/X-VERDIKT/', '_blank');
-  });
-}
 
 function genUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
