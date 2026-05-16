@@ -152,16 +152,22 @@ function parseArtifacts(rawInput) {
     add('base64', 'Base64', 'threat', v);
   }
 
-  /* 15. Domains — after IPs/URLs so numeric-only dotted strings stay as IPs */
+  /* 15. Domains — last, so IPs/URLs/filenames are already claimed */
+  const FILE_EXTS = new Set([
+    'exe','dll','sys','bat','cmd','vbs','hta','msi','scr','pif','lnk',
+    'jar','apk','iso','img','bin','dat','log','tmp','bak','ini','cfg','conf',
+    'doc','xls','pdf','rtf','zip','rar','tar','gz',
+  ]);
+  const urlKeys = [...seen].filter(k => k.startsWith('url::')).map(k => k.slice(5));
   const domainRe = /\b(?:[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}\b/gi;
   for (const m of text.matchAll(domainRe)) {
     const v = m[0].toLowerCase();
     if (seen.has(`ip::${v}`) || seen.has(`email::${v}`)) continue;
-    /* skip if it's inside an already-extracted URL */
-    const inUrl = [...seen].some(k => k.startsWith('url::') && k.slice(5).includes(v));
-    if (inUrl) continue;
+    if (seen.has(`process::${v}`) || seen.has(`dll::${v}`)) continue;
+    const tld = v.split('.').pop();
+    if (FILE_EXTS.has(tld)) continue;
+    if (urlKeys.some(u => u.includes(v))) continue;
     const parts = v.split('.');
-    /* skip version strings like 1.2.3.4 or 10.0.0 */
     if (parts.slice(0, -1).every(l => /^\d+$/.test(l))) continue;
     add('domain', 'Domain', 'network', v);
   }
