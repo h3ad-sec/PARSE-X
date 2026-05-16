@@ -103,7 +103,7 @@ function renderTable(artifacts) {
   const tbody = document.getElementById('results-body');
   if (!tbody) return;
   if (!artifacts.length) {
-    tbody.innerHTML = `<tr><td colspan="4" class="empty-state">NO ARTIFACTS MATCH FILTER</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" class="empty-state">NO ARTIFACTS MATCH FILTER</td></tr>`;
     return;
   }
   tbody.innerHTML = artifacts.map((a, i) => buildRow(a, i + 1)).join('');
@@ -114,14 +114,18 @@ function buildRow(a, idx) {
   const displayVal = a.value.length > 90 ? a.value.slice(0, 90) + '…' : a.value;
   const escapedVal = escapeHtml(a.value);
   const safeVal = escapedVal.replace(/'/g, '&#39;');
+  const delay = Math.min(idx * 18, 300);
 
-  return `<tr>
+  return `<tr style="animation-delay:${delay}ms">
+    <td class="col-stripe" style="padding:0">
+      <span class="col-stripe-cell" style="background:${color};animation-delay:${delay}ms"></span>
+    </td>
     <td class="col-num">${idx}</td>
     <td class="col-type">
       <span class="type-badge" style="color:${color};border-color:${color}20;background:${color}10">${escapeHtml(a.label)}</span>
     </td>
     <td class="col-val">
-      <span class="artifact-val" title="${escapedVal}">${escapeHtml(displayVal)}</span>
+      <span class="artifact-val" title="${escapedVal}" onclick="copyVal('${safeVal}')">${escapeHtml(displayVal)}</span>
     </td>
     <td class="col-copy">
       <button class="btn-copy" onclick="copyVal('${safeVal}')" title="Copy to clipboard">
@@ -238,6 +242,3 @@ function copyAllArtifacts() {
   );
 }
 
-/* ── Modal (full value view) ──────────────────────────────────────────────── */
-function openModal() { document.getElementById('modal-overlay').classList.add('open'); }
-function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }

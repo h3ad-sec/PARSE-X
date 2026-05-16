@@ -163,12 +163,11 @@ function parseRealtime() {
   }
 
   const counts = getTypeCounts(artifacts);
-  const parts = [`<span>${total}</span> artifact${total > 1 ? 's' : ''}`];
-  const summary = [];
-  for (const [t, c] of Object.entries(counts))
-    summary.push(`${c} ${TYPE_LABELS[t] || t}`);
-  if (summary.length) parts.push(summary.join(' · '));
-
-  if (infoEl) infoEl.innerHTML = parts.join(' · ');
+  const chips = Object.entries(counts).map(([t, c]) => {
+    const color = (typeof TYPE_COLORS !== 'undefined' && TYPE_COLORS[t]) || 'var(--muted)';
+    const lbl = TYPE_LABELS[t] || t;
+    return `<span style="color:${color};white-space:nowrap">${c} ${lbl}</span>`;
+  });
+  if (infoEl) infoEl.innerHTML = `<span>${total}</span> found · ` + chips.join('<span style="color:var(--border)"> · </span>');
   if (btnEl) btnEl.disabled = false;
 }

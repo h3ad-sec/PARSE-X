@@ -3,7 +3,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeModal();
+    if (e.key === 'Escape') document.getElementById('export-modal')?.classList.remove('open');
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       const btn = document.getElementById('extract-btn');
       if (!btn?.disabled) extractArtifacts();
@@ -49,7 +49,7 @@ function clearAll() {
 }
 
 function switchInputTab(tab, btn) {
-  document.querySelectorAll('.input-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.input-pill').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
   document.getElementById(`tab-${tab}`)?.classList.add('active');
@@ -81,7 +81,7 @@ function processFile(file) {
 }
 
 function loadTextIntoInput(text, filename) {
-  const firstTab = document.querySelector('.input-tab');
+  const firstTab = document.querySelector('.input-pill');
   if (firstTab) switchInputTab('text', firstTab);
   const inp = document.getElementById('px-input');
   if (inp) { inp.value = text; parseRealtime(); }
