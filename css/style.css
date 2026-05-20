@@ -1,28 +1,32 @@
 /* ══ PARSE-X — Design System ════════════════════════════════════════════════ */
 
 :root {
-  --bg:#06080f; --panel:#0b0f1a; --panel2:#0f1520;
-  --text:#e6f1ff; --muted:#7d8fb3;
-  --accent:#00ff9f; --accent2:#3b82f6;
-  --border:#1a2238; --nav-h:48px; --hero-h:70px;
-  --red:#ff3b5c; --yellow:#ffd60a; --green:#00ff9f;
-  --mono:'Share Tech Mono',monospace; --sans:'Inter',sans-serif;
+  --bg:#080c14; --panel:#0d1117; --panel-alt:#111827; --panel2:#111827;
+  --text:#e6edf3; --muted:#6b7280;
+  --accent:#00d4ff; --accent2:#3b82f6;
+  --border:#1c2333; --nav-h:48px; --hero-h:70px;
+  --red:#ff3b5c; --yellow:#ffd60a; --green:#00d4ff;
+  --primary:#00d4ff; --primary-dim:rgba(0,212,255,0.08); --primary-glow:rgba(0,212,255,0.18);
+  --status-live:#00d4ff; --status-partial:#f59e0b; --status-soon:#2d3748;
+  --mono:'Share Tech Mono',monospace; --sans:'Exo 2',sans-serif;
   --fs-xs:11px; --fs-sm:13px; --fs-base:15px; --fs-md:16px; --fs-lg:18px;
 }
 body.light {
-  --bg:#f5f7fb; --panel:#ffffff; --panel2:#f0f2f7;
-  --text:#0b1220; --muted:#5c6b8a;
-  --accent:#0077ff; --accent2:#00a86b; --border:#d9e1f2;
+  --bg:#f8fafc; --panel:#ffffff; --panel-alt:#f1f5f9; --panel2:#f1f5f9;
+  --text:#0d1117; --muted:#5c6b8a;
+  --accent:#0284c7; --accent2:#0284c7; --border:#e2e8f0;
+  --primary:#0284c7; --primary-dim:rgba(2,132,199,0.07);
+  --status-live:#0284c7; --status-partial:#d97706;
   --green:#059669; --red:#dc2626; --yellow:#d97706;
 }
 
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:var(--fs-base);line-height:1.55;min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s;}
+body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;font-size:var(--fs-base);line-height:1.55;min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 45% at 50% 0%,rgba(0,212,255,0.055) 0%,transparent 100%),radial-gradient(ellipse 50% 35% at 5% 100%,rgba(88,166,255,0.04) 0%,transparent 100%);pointer-events:none;z-index:0;}
+body.light::before{background:radial-gradient(ellipse 80% 45% at 50% 0%,rgba(2,132,199,0.05) 0%,transparent 100%),radial-gradient(ellipse 50% 35% at 5% 100%,rgba(37,99,235,0.03) 0%,transparent 100%);}
 
-#matrix{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.2;}
-
-/* ── Animations ──────────────────────────────────────────────────────────── */
+/* ── Animations ─────────────────────────────────────────────────────────── */
 @keyframes fadeIn    { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
 @keyframes rowIn     { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:none} }
 @keyframes chipPop   { from{opacity:0;transform:scale(.88)} to{opacity:1;transform:scale(1)} }
@@ -33,7 +37,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:va
 .nav{position:fixed;top:0;left:0;right:0;z-index:50;background:var(--panel);border-bottom:1px solid var(--border);height:var(--nav-h);display:flex;align-items:center;padding:0 1.25rem;transition:background .3s,border-color .3s;}
 .nav-brand{font-family:var(--mono);font-size:.78rem;color:var(--accent);letter-spacing:.06em;white-space:nowrap;flex-shrink:0;margin-right:1rem;text-decoration:none;}
 .nav-links{position:absolute;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:2px;overflow:visible;}
-.nav-links a{font-family:var(--mono);font-size:var(--fs-xs);color:var(--muted);text-decoration:none;padding:5px 8px;border-radius:4px;border:1px solid transparent;white-space:nowrap;transition:all .15s;}
+.nav-links a{font-family:'Exo 2',sans-serif;font-weight:500;font-size:var(--fs-xs);color:var(--muted);text-decoration:none;padding:5px 8px;border-radius:4px;border:1px solid transparent;white-space:nowrap;transition:all .15s;}
 .nav-links a:hover{color:var(--accent);border-color:var(--border);background:rgba(0,255,159,.04);}
 .nav-links a.nav-current{color:var(--accent);border:1px solid var(--border);}
 .nav-divider{width:1px;height:18px;background:var(--border);margin:0 4px;flex-shrink:0;}
@@ -58,10 +62,10 @@ body.light .toggle-thumb{transform:translateX(22px);}
 
 /* ── Nav pill ────────────────────────────────────────────────────────────── */
 .xv-nav-pill{display:flex;flex-direction:column;align-items:flex-start;gap:1px;margin-left:10px;padding-left:10px;border-left:1px solid var(--border);opacity:0;transform:translateX(-8px);pointer-events:none;transition:opacity .3s ease,transform .3s cubic-bezier(.4,0,.2,1);white-space:nowrap;flex-shrink:0;}
-.xv-pill-name{font-family:var(--mono);font-size:13px;letter-spacing:4px;line-height:1;}
+.xv-pill-name{font-family:'Exo 2',sans-serif;font-weight:700;font-size:13px;letter-spacing:4px;line-height:1;}
 .xv-pill-accent{color:var(--accent);}
 .xv-pill-text{color:var(--text);}
-.xv-pill-tagline{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1.5px;}
+.xv-pill-tagline{font-family:'Exo 2',sans-serif;font-weight:400;font-size:8px;color:var(--muted);letter-spacing:1.5px;}
 body.hero-hidden .xv-nav-pill{opacity:1;transform:translateX(0);pointer-events:auto;}
 
 /* ── Hero strip ──────────────────────────────────────────────────────────── */
@@ -76,9 +80,9 @@ body.hero-hidden .wrapper{padding-top:calc(var(--nav-h) + 20px);}
 .hero-breadcrumb a{color:var(--muted);text-decoration:none;}
 .hero-breadcrumb a:hover{color:var(--accent);}
 .hero-breadcrumb .hero-current{color:var(--accent);}
-.hero-title{font-family:var(--mono);font-size:22px;letter-spacing:5px;line-height:1;}
+.hero-title{font-family:'Exo 2',sans-serif;font-weight:700;font-size:22px;letter-spacing:5px;line-height:1;}
 .hero-x{color:var(--accent);} .hero-name{color:var(--text);}
-.hero-tagline{font-family:var(--mono);font-size:var(--fs-xs);color:var(--muted);letter-spacing:2px;}
+.hero-tagline{font-family:'Exo 2',sans-serif;font-weight:300;font-size:var(--fs-xs);color:var(--muted);letter-spacing:2px;}
 
 /* Hero capability caps */
 .hero-caps{display:flex;align-items:center;gap:10px;flex:1;justify-content:flex-end;flex-wrap:wrap;}

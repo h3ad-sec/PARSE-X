@@ -8,14 +8,12 @@
   <meta name="description"
     content="PARSE-X by H3AD-SEC — Extract artifacts from raw text. IP, domain, URL, hash, registry, process, DLL, CVE, MITRE ATT&CK, MAC, email, port, and more.">
   <link rel="icon" href="https://h3ad-sec.github.io/fevicon.png?v=2026" type="image/png">
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css?v=20260516c">
 </head>
 
 <body class="dark">
   <div id="scroll-sentinel" aria-hidden="true"></div>
-  <canvas id="matrix"></canvas>
 
   <nav class="nav">
     <div class="hamburger" id="hamburger" onclick="toggleDrawer()"><span></span><span></span><span></span></div>
@@ -328,43 +326,6 @@
       }, { threshold: 0 }).observe(s);
     })();
 
-    const canvas = document.getElementById('matrix'), ctx = canvas.getContext('2d');
-    const chars = [
-      'PARSE-X','EXTRACT','ARTIFACT','DEFANG','IOC','TRIAGE',
-      'IPv4','IPv6','DOMAIN','URL','EMAIL','MAC','PORT',
-      'MD5','SHA256','SHA512','HASH',
-      'HKLM','HKCU','REGISTRY',
-      'C:\\Windows\\','%APPDATA%','%TEMP%',
-      '/etc/passwd','/tmp/','/var/log/',
-      'svchost.exe','cmd.exe','powershell.exe','rundll32.exe',
-      'evil.dll','malware.sys','dropper.exe',
-      'CVE-2024-','T1059','T1566','T1055',
-      '192.168.','10.0.0.','8.8.8.8',
-      ':4444',':8080',':443',
-      'hxxps://','[.]','[dot]',
-      'H3AD-X','H3AD-SEC',
-    ];
-    let drops = [];
-    function initMatrix() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      drops = Array(Math.floor(window.innerWidth / 18)).fill(1);
-    }
-    function drawMatrix() {
-      const l = document.body.classList.contains('light');
-      ctx.fillStyle = l ? 'rgba(245,247,251,0.08)' : 'rgba(0,0,0,0.12)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = l ? '#0077ff' : '#00ff9f';
-      ctx.font = '12px monospace';
-      for (let i = 0; i < drops.length; i++) {
-        ctx.fillText(chars[Math.floor(Math.random() * chars.length)], i * 18, drops[i] * 18);
-        if (drops[i] * 18 > canvas.height && Math.random() > 0.975) drops[i] = 0;
-        drops[i]++;
-      }
-    }
-    window.addEventListener('resize', initMatrix);
-    initMatrix();
-    setInterval(drawMatrix, 45);
   </script>
 </body>
 </html>
