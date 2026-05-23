@@ -340,10 +340,10 @@
       const l = document.body.classList.toggle('light');
       document.body.classList.toggle('dark', !l);
       const t = l ? 'light' : 'dark';
-      localStorage.setItem('theme', t);
+      localStorage.setItem('h3ad-theme', t);
       updateNavLogo(t);
     }
-    const _t = localStorage.getItem('theme');
+    const _t = localStorage.getItem('h3ad-theme');
     if (_t === 'light') { document.body.classList.add('light'); document.body.classList.remove('dark'); updateNavLogo('light'); }
     else { document.body.classList.add('dark'); document.body.classList.remove('light'); }
 
