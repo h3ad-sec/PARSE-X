@@ -22,6 +22,13 @@ body.light {
 
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--primary, #00d4ff);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
 body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;font-size:var(--fs-base);line-height:1.55;min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s;}
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 45% at 50% 0%,rgba(0,212,255,0.055) 0%,transparent 100%),radial-gradient(ellipse 50% 35% at 5% 100%,rgba(88,166,255,0.04) 0%,transparent 100%);pointer-events:none;z-index:0;}
 body.light::before{background:radial-gradient(ellipse 80% 45% at 50% 0%,rgba(2,132,199,0.05) 0%,transparent 100%),radial-gradient(ellipse 50% 35% at 5% 100%,rgba(37,99,235,0.03) 0%,transparent 100%);}
