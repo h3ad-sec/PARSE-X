@@ -290,3 +290,7 @@ body.nav-compact .hamburger { display: flex; }
   .summary-num{font-size:15px;}
   .col-type{width:80px;}
 }
+
+/* H3AD-SEC MENU SYNC: hamburger-only nav */
+.nav-links{display:none!important;}
+.hamburger{display:flex!important;}
